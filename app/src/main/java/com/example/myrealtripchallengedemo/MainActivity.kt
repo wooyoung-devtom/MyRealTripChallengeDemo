@@ -1,10 +1,9 @@
 package com.example.myrealtripchallengedemo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -16,8 +15,16 @@ class MainActivity : AppCompatActivity() {
         val navHostFragment = nav_host_fragment_container as NavHostFragment
         val navController = navHostFragment.navController
 
-        navController.addOnDestinationChangedListener{ _, _, _ ->
-
+        navController.addOnDestinationChangedListener{ _, destination, _ ->
+            when(destination.id) {
+                R.id.splashFragment -> {
+                    main_toolbar.visibility = View.GONE
+                }
+                R.id.mainFragment -> {
+                    main_toolbar.visibility = View.VISIBLE
+                    main_toolbar.title = "뉴스 리스트"
+                }
+            }
         }
     }
 }
