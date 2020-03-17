@@ -17,5 +17,7 @@ class SplashViewModel : ViewModel() {
         _versionTextLiveData.postValue("v ${BuildConfig.VERSION_CODE}")
     }
 
-
+    fun startMainFragment() {
+        _startMainFragmentEvent
+    }
 }

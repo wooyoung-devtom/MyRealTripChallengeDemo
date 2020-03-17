@@ -7,5 +7,5 @@ import retrofit2.http.GET
 interface RssService {
 
     @GET("rss")
-    fun getRssData(): Single<RssBase>
+    fun getRssData(): Single<String>
 }
