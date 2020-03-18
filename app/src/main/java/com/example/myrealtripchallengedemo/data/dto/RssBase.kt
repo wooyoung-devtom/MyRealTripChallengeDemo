@@ -1,4 +1,5 @@
 package com.example.myrealtripchallengedemo.data.dto
 
-class RssBase {
-}
+//data class RssBase(
+//    val rss: List<RssChannel>
+//)
