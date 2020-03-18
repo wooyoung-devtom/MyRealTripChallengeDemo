@@ -14,17 +14,5 @@ class MainActivity : AppCompatActivity() {
 
         val navHostFragment = nav_host_fragment_container as NavHostFragment
         val navController = navHostFragment.navController
-
-        navController.addOnDestinationChangedListener{ _, destination, _ ->
-            when(destination.id) {
-                R.id.splashFragment -> {
-                    main_toolbar.visibility = View.GONE
-                }
-                R.id.mainFragment -> {
-                    main_toolbar.visibility = View.VISIBLE
-                    main_toolbar.title = "뉴스 리스트"
-                }
-            }
-        }
     }
 }

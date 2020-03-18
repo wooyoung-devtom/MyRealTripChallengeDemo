@@ -1,7 +1,7 @@
 package com.example.myrealtripchallengedemo.data.repository
 
-import com.example.myrealtripchallengedemo.data.RssRepository
 import com.example.myrealtripchallengedemo.data.api.RssService
+import com.example.myrealtripchallengedemo.data.dto.RssBase
 import io.reactivex.Single
 
 class RssRepositoryImpl (

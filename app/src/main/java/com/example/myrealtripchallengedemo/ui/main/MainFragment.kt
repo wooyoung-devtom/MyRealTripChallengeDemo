@@ -34,4 +34,9 @@ class MainFragment : Fragment() {
             })
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.destroyDisposable()
+    }
 }

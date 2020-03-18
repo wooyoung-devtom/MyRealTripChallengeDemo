@@ -1,7 +1,7 @@
 package com.example.myrealtripchallengedemo.di
 
-import com.example.myrealtripchallengedemo.data.RssRepository
 import com.example.myrealtripchallengedemo.data.api.RssService
+import com.example.myrealtripchallengedemo.data.repository.RssRepository
 import com.example.myrealtripchallengedemo.data.repository.RssRepositoryImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -20,7 +20,7 @@ val apiModule = module {
 
 fun provideOkHttpClient(): OkHttpClient {
     val httpClientBuilder = OkHttpClient().newBuilder()
-    val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
+    val logging = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
     httpClientBuilder.addInterceptor(logging)
 
     return httpClientBuilder.build()
