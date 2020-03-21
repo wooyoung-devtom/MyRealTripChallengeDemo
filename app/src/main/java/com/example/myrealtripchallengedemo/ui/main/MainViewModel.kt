@@ -31,6 +31,7 @@ class MainViewModel(
             .observeOn(AndroidSchedulers.mainThread())
             .timeout(5, TimeUnit.SECONDS)
             .subscribe ({ result ->
+                _rssLiveData.postValue(result)
                 Log.e("ViewModel", "$result")
             }, { error ->
                 _rssLiveData.postValue(error.message)
