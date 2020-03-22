@@ -1,19 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="150dp"
+    android:layout_width="match_parent"
+    android:layout_height="130dp"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
+        android:id="@+id/thumbnail_news"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:layout_width="125dp"
-        android:layout_height="125dp"/>
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
 
+    <TextView
+        android:id="@+id/news_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintLeft_toRightOf="@+id/thumbnail_news"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/thumbnail_news"
+        app:layout_constraintBottom_toTopOf="@+id/news_text"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:hint="황희석 “조국 사태는 검찰 쿠데타” 김의겸 “언론개혁 이룰것” - 한겨레"/>
+
+    <TextView
+        android:id="@+id/news_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:textSize="15sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintTop_toBottomOf="@+id/news_title"
+        app:layout_constraintLeft_toLeftOf="@+id/news_title"
+        app:layout_constraintBottom_toTopOf="@+id/keyword_layout"
+        app:layout_constraintRight_toRightOf="parent"
+        android:hint="News Summary"/>
+
+    <LinearLayout
+        android:id="@+id/keyword_layout"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        app:layout_constraintLeft_toLeftOf="@+id/news_title"
+        app:layout_constraintBottom_toBottomOf="@id/thumbnail_news"
+        app:layout_constraintTop_toBottomOf="@+id/news_text"
+        app:layout_constraintRight_toRightOf="parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/keyword_first"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:hint="First Keyword"/>
+        <TextView
+            android:id="@+id/keyword_second"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:hint="Second Keyword"/>
+        <TextView
+            android:id="@+id/keyword_third"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:hint="ThirdKeyword"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

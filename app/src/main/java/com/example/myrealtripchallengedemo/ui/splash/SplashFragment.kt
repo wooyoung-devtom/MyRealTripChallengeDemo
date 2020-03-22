@@ -23,6 +23,11 @@ class SplashFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        return inflater.inflate(R.layout.fragment_splash, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         Log.e("Splash Fragment", "Splash")
 
@@ -31,12 +36,6 @@ class SplashFragment : Fragment() {
         Handler().postDelayed( Runnable {
             findNavController().navigate(R.id.action_splashFragment_to_mainFragment)
         }, SPLASH_TIMER)
-
-        return inflater.inflate(R.layout.fragment_splash, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         viewModel.versionTextLiveData.observe(viewLifecycleOwner, Observer { version ->
             text_app_version.text = version

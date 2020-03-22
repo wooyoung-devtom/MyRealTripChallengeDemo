@@ -29,8 +29,8 @@ fun provideOkHttpClient(): OkHttpClient {
 fun provideRssRetrofit(okHttpClient: OkHttpClient): Retrofit {
     return Retrofit.Builder().baseUrl("https://news.google.com")
         .client(okHttpClient)
-        .addConverterFactory(ScalarsConverterFactory.create())
-//        .addConverterFactory(SimpleXmlConverterFactory.create())
+//        .addConverterFactory(ScalarsConverterFactory.create())
+        .addConverterFactory(SimpleXmlConverterFactory.create())
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
 }

@@ -1,6 +1,6 @@
 package com.example.myrealtripchallengedemo.data.api
 
-import com.example.myrealtripchallengedemo.data.dto.RssBase
+import com.example.myrealtripchallengedemo.data.dto.RssFeed
 import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -12,5 +12,5 @@ interface RssService {
         @Query("hl") hl: String,
         @Query("gl") gl: String,
         @Query("ceid") ceid: String
-    ): Single<String>
+    ): Single<RssFeed>
 }
