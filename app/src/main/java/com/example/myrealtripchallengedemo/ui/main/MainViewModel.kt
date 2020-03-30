@@ -11,10 +11,8 @@ import com.example.myrealtripchallengedemo.data.repository.RssRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
@@ -28,7 +26,7 @@ class MainViewModel(
     }
 
     var rssItems: List<RssItem>? = null
-    var newsBodyItems: ArrayList<NewsBody>? = null
+    private val newsBodyItems = ArrayList<NewsBody>()
 
     private val compositeDisposable = CompositeDisposable()
 
@@ -38,38 +36,65 @@ class MainViewModel(
     private val _newsTextLiveData = MutableLiveData<ArrayList<NewsBody>>()
     val newsTextLiveData: LiveData<ArrayList<NewsBody>> get() = _newsTextLiveData
 
+    private val _stopRefreshLiveEvent = MutableLiveData<Boolean>()
+    val stopRefreshLiveEvent: LiveData<Boolean> get() = _stopRefreshLiveEvent
+
     fun getRssData() {
         compositeDisposable.add(rssRepository.getRssData(hl, gl, ceid)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .timeout(5, TimeUnit.SECONDS)
-            .doOnSuccess { getNewsText(it.channel?.item) }
+            .doOnSuccess { getNewsBody(it.channel?.item) }
             .subscribe ({ result ->
-                _rssLiveData.postValue(result)
                 rssItems = result.channel?.item
-                Log.e("ViewModel", "$result")
+                Log.e("ViewModel", "$rssItems")
             }, { error ->
                 Log.e("ViewModel fail", "${error.message}")
-            })
-        )
+            }))
     }
 
-    fun getNewsText(list: List<RssItem>?) {
-        GlobalScope.launch(Dispatchers.IO) {
-            for(item in list!!) {
-                val newsBody = rssRepository.getNewsData(item.link!!)
-                newsBodyItems?.add(newsBody)
-            }
+    private fun getNewsBody(list: List<RssItem>?) {
+        if(list != null) {
+            for(item in list) {
+                val link = item.link!!
+                val title = item.title!!
+                compositeDisposable.add(rssRepository.getNewsData(link)
+                    .doOnSubscribe { _stopRefreshLiveEvent.postValue(true) }
+                    .doOnSuccess { _stopRefreshLiveEvent.postValue(false) }
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .timeout(5, TimeUnit.SECONDS)
+                    .subscribe ({ result ->
+                        val doc = Jsoup.parse(result)
+                        val imgUrl = doc.select("meta[property=og:image]").attr("content")
+                        val description = doc.select("meta[property=og:description]").attr("content")
+                        val arr = description.split(" ", "“", "”", "‘", "’", ",", "[", "]", "...", "=", ".",
+                        "(", ")") as MutableList
+                        for(str in arr) Log.e("ViewModel", "$str , ${str.length}")
+//                        Log.e("ViewModel new Description", "$arr")
+                        val newsBody = NewsBody(title, link, imgUrl, description, arr, null)
 
-            Log.e("getNewsText", "$newsBodyItems")
+                        newsBodyItems.add(newsBody)
+                        _newsTextLiveData.postValue(newsBodyItems)
+                    }, { error ->
+                        Log.e("ViewModel fail in news body", "${error.message}")
+                    }))
+            }
+            Log.e("ViewModel", "$newsBodyItems")
+        } else Log.e("ViewModel", "News List is Empty!!")
+    }
+
+    private fun getKeyword(newsBodyItems: ArrayList<NewsBody>) {
+        for(newsBodyItem in newsBodyItems) {
+
         }
     }
 
-    fun itemListSize(): Int = this.rssItems?.size ?: 0
+    fun itemListSize(): Int = this.newsBodyItems.size
 
     fun getRssItem(position: Int): RssItem? = this.rssItems?.get(position)
 
-    fun getNewsItem(position: Int): NewsBody? = this.newsBodyItems?.get(position)
+    fun getNewsItem(position: Int): NewsBody? = this.newsBodyItems[position]
 
     fun destroyDisposable() {
         compositeDisposable.clear()

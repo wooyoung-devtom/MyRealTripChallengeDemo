@@ -23,6 +23,7 @@ class SplashFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        viewModel.getApplicationVersion()
         return inflater.inflate(R.layout.fragment_splash, container, false)
     }
 
@@ -31,14 +32,13 @@ class SplashFragment : Fragment() {
 
         Log.e("Splash Fragment", "Splash")
 
-        viewModel.getApplicationVersion()
-
         Handler().postDelayed( Runnable {
             findNavController().navigate(R.id.action_splashFragment_to_mainFragment)
         }, SPLASH_TIMER)
 
         viewModel.versionTextLiveData.observe(viewLifecycleOwner, Observer { version ->
             text_app_version.text = version
+            Log.e("Splash Fragment", version)
         })
     }
 }

@@ -29,8 +29,7 @@
         android:textStyle="bold"
         android:textSize="20sp"
         android:maxLines="1"
-        android:ellipsize="end"
-        android:hint="황희석 “조국 사태는 검찰 쿠데타” 김의겸 “언론개혁 이룰것” - 한겨레"/>
+        android:ellipsize="end"/>
 
     <TextView
         android:id="@+id/news_text"
@@ -42,8 +41,7 @@
         app:layout_constraintTop_toBottomOf="@+id/news_title"
         app:layout_constraintLeft_toLeftOf="@+id/news_title"
         app:layout_constraintBottom_toTopOf="@+id/keyword_layout"
-        app:layout_constraintRight_toRightOf="parent"
-        android:hint="News Summary"/>
+        app:layout_constraintRight_toRightOf="@+id/news_title"/>
 
     <LinearLayout
         android:id="@+id/keyword_layout"
@@ -52,24 +50,35 @@
         app:layout_constraintLeft_toLeftOf="@+id/news_title"
         app:layout_constraintBottom_toBottomOf="@id/thumbnail_news"
         app:layout_constraintTop_toBottomOf="@+id/news_text"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintRight_toRightOf="@+id/news_title"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/keyword_first"
+            android:textSize="13sp"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="25dp"
-            android:hint="First Keyword"/>
+            android:hint="First Key"
+            android:background="@drawable/keyword_background"
+            android:layout_marginEnd="15dp"/>
         <TextView
             android:id="@+id/keyword_second"
+            android:textSize="13sp"
+            android:gravity="center"
             android:layout_width="wrap_content"
+            android:hint="Second Key"
+            android:background="@drawable/keyword_background"
             android:layout_height="25dp"
-            android:hint="Second Keyword"/>
+            android:layout_marginEnd="15dp"/>
         <TextView
             android:id="@+id/keyword_third"
+            android:textSize="13sp"
+            android:gravity="center"
+            android:hint="Third Key"
+            android:background="@drawable/keyword_background"
             android:layout_width="wrap_content"
-            android:layout_height="25dp"
-            android:hint="ThirdKeyword"/>
+            android:layout_height="25dp"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
