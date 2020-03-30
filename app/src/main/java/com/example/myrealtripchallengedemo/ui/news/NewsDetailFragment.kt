@@ -15,12 +15,19 @@ import kotlinx.android.synthetic.main.fragment_news_detail.*
 class NewsDetailFragment : Fragment() {
     private var url: String? = null
     private var title: String? = null
+    private var firstKey: String? = null
+    private var secondKey: String? = null
+    private var thirdKey: String? = null
+
     private val webViewClient = WebViewClient()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         url = arguments?.getString("url")
         title = arguments?.getString("title")
+        firstKey = arguments?.getString("firstKey")
+        secondKey = arguments?.getString("secondKey")
+        thirdKey = arguments?.getString("thirdKey")
 
         return inflater.inflate(R.layout.fragment_news_detail, container, false)
     }
@@ -29,6 +36,9 @@ class NewsDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         news_detail_toolbar.title = title
+        keyword_first_detail.text = firstKey
+        keyword_second_detail.text = secondKey
+        keyword_third_detail.text = thirdKey
 
         news_web_view.webViewClient = webViewClient
         news_web_view.settings.javaScriptEnabled = true

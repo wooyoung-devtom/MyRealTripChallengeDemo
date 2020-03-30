@@ -38,10 +38,13 @@ class MainFragment : Fragment() {
         news_list.layoutManager = LinearLayoutManager(context)
 
         viewModel.newsTextLiveData.observe(viewLifecycleOwner, Observer {
-            adapter.notifyDataSetChanged()
+            viewModel.parseHtmlString(it)
         })
-        viewModel.stopRefreshLiveEvent.observe(viewLifecycleOwner, Observer {
+        viewModel.startRefreshLiveEvent.observe(viewLifecycleOwner, Observer {
             news_list_container.isRefreshing = it
+        })
+        viewModel.newsDetailBodyListLiveData.observe(viewLifecycleOwner, Observer {
+            adapter.notifyDataSetChanged()
         })
 
         news_list_container.setOnRefreshListener {

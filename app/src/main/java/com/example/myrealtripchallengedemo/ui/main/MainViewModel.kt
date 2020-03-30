@@ -5,13 +5,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.myrealtripchallengedemo.data.dto.NewsBody
-import com.example.myrealtripchallengedemo.data.dto.RssFeed
+import com.example.myrealtripchallengedemo.data.dto.NewsDetailBody
+import com.example.myrealtripchallengedemo.data.dto.NewsDetailBody.KeyWord
 import com.example.myrealtripchallengedemo.data.dto.RssItem
 import com.example.myrealtripchallengedemo.data.repository.RssRepository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.*
 import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
 
@@ -25,21 +25,21 @@ class MainViewModel(
         const val ceid = "KR:ko"
     }
 
-    var rssItems: List<RssItem>? = null
-    private val newsBodyItems = ArrayList<NewsBody>()
-
+    private var rssItems: List<RssItem>? = null
+    private val newsDetailBodyItems = ArrayList<NewsDetailBody>()
     private val compositeDisposable = CompositeDisposable()
 
-    private val _rssLiveData = MutableLiveData<RssFeed>()
-    val rssLiveData: LiveData<RssFeed> get() = _rssLiveData
+    private val _newsTextLiveData = MutableLiveData<NewsBody>()
+    val newsTextLiveData: LiveData<NewsBody> get() = _newsTextLiveData
 
-    private val _newsTextLiveData = MutableLiveData<ArrayList<NewsBody>>()
-    val newsTextLiveData: LiveData<ArrayList<NewsBody>> get() = _newsTextLiveData
+    private val _newsDetailBodyListLiveData = MutableLiveData<ArrayList<NewsDetailBody>>()
+    val newsDetailBodyListLiveData: LiveData<ArrayList<NewsDetailBody>> get() = _newsDetailBodyListLiveData
 
-    private val _stopRefreshLiveEvent = MutableLiveData<Boolean>()
-    val stopRefreshLiveEvent: LiveData<Boolean> get() = _stopRefreshLiveEvent
+    private val _startRefreshLiveEvent = MutableLiveData<Boolean>()
+    val startRefreshLiveEvent: LiveData<Boolean> get() = _startRefreshLiveEvent
 
     fun getRssData() {
+        newsDetailBodyItems.clear()
         compositeDisposable.add(rssRepository.getRssData(hl, gl, ceid)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -59,42 +59,56 @@ class MainViewModel(
                 val link = item.link!!
                 val title = item.title!!
                 compositeDisposable.add(rssRepository.getNewsData(link)
-                    .doOnSubscribe { _stopRefreshLiveEvent.postValue(true) }
-                    .doOnSuccess { _stopRefreshLiveEvent.postValue(false) }
+                    .doOnSubscribe { _startRefreshLiveEvent.postValue(true) }
+                    .doOnSuccess { _startRefreshLiveEvent.postValue(false) }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .timeout(5, TimeUnit.SECONDS)
+                    .timeout(10, TimeUnit.SECONDS)
                     .subscribe ({ result ->
-                        val doc = Jsoup.parse(result)
-                        val imgUrl = doc.select("meta[property=og:image]").attr("content")
-                        val description = doc.select("meta[property=og:description]").attr("content")
-                        val arr = description.split(" ", "“", "”", "‘", "’", ",", "[", "]", "...", "=", ".",
-                        "(", ")") as MutableList
-                        for(str in arr) Log.e("ViewModel", "$str , ${str.length}")
-//                        Log.e("ViewModel new Description", "$arr")
-                        val newsBody = NewsBody(title, link, imgUrl, description, arr, null)
-
-                        newsBodyItems.add(newsBody)
-                        _newsTextLiveData.postValue(newsBodyItems)
+                        val newsBody = NewsBody(title, link, result)
+                        _newsTextLiveData.postValue(newsBody)
+                        Log.e("ViewModel success in news body", "$newsBody")
                     }, { error ->
                         Log.e("ViewModel fail in news body", "${error.message}")
                     }))
             }
-            Log.e("ViewModel", "$newsBodyItems")
         } else Log.e("ViewModel", "News List is Empty!!")
     }
 
-    private fun getKeyword(newsBodyItems: ArrayList<NewsBody>) {
-        for(newsBodyItem in newsBodyItems) {
+    fun parseHtmlString(newsBody: NewsBody) {
+        val temp = ArrayList<String>()
+        val strMap = mutableMapOf<String, Int>()
+        val doc = Jsoup.parse(newsBody.html)
+        val imgUrl = doc.select("meta[property=og:image]").attr("content")
+        val description = doc.select("meta[property=og:description]").attr("content")
 
+        val arr = description.split(" ", "“", "”", "‘", "’", ",",
+            "[", "]", "...", "=", ".", "(", ")", ":", "\"", "\'") as MutableList
+
+        for(str in arr) {
+            if(str.length >= 2) {
+                temp.add(str)
+                strMap[str] = 0
+            }
         }
+        for(str in temp) {
+            val count = strMap[str]?.plus(1)
+            strMap[str] = count!!
+        }
+        val keySortedMap = strMap.toSortedMap()
+        val listMap = keySortedMap.toList()
+            .sortedWith(compareByDescending { it.second })
+        Log.e("Parse HTML", "$listMap")
+
+        val keyWord = KeyWord(listMap[0].first, listMap[1].first, listMap[2].first)
+        val newsDetailBody = NewsDetailBody(imgUrl, description, newsBody, keyWord)
+        newsDetailBodyItems.add(newsDetailBody)
+        _newsDetailBodyListLiveData.postValue(newsDetailBodyItems)
     }
 
-    fun itemListSize(): Int = this.newsBodyItems.size
+    fun itemListSize(): Int = this.newsDetailBodyItems.size
 
-    fun getRssItem(position: Int): RssItem? = this.rssItems?.get(position)
-
-    fun getNewsItem(position: Int): NewsBody? = this.newsBodyItems[position]
+    fun getNewsItem(position: Int): NewsDetailBody = this.newsDetailBodyItems[position]
 
     fun destroyDisposable() {
         compositeDisposable.clear()

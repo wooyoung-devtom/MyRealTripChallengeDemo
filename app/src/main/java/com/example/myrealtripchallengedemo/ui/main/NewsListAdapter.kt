@@ -28,13 +28,19 @@ class NewsListAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val newsItem = viewModel.getNewsItem(position)
 
-        Glide.with(holder.itemView).load(newsItem?.thumbnailImg).into(holder.itemView.thumbnail_news)
-        holder.itemView.news_title.text = newsItem?.title
-        holder.itemView.news_text.text = newsItem?.text
+        Glide.with(holder.itemView).asBitmap().load(newsItem.imgUrl).into(holder.itemView.thumbnail_news)
+        holder.itemView.news_title.text = newsItem.newsBody?.title
+        holder.itemView.news_text.text = newsItem.description
+        holder.itemView.keyword_first.text = newsItem.keyWord?.firstKey!!
+        holder.itemView.keyword_second.text = newsItem.keyWord.secondKey!!
+        holder.itemView.keyword_third.text = newsItem.keyWord.thirdKey!!
         holder.itemView.setOnClickListener {
             val bundle = bundleOf(
-                "url" to newsItem?.link,
-                "title" to newsItem?.title
+                "url" to newsItem.newsBody?.link,
+                "title" to newsItem.newsBody?.title,
+                "firstKey" to newsItem.keyWord.firstKey,
+                "secondKey" to newsItem.keyWord.secondKey,
+                "thirdKey" to newsItem.keyWord.thirdKey
             )
             it.findNavController().navigate(R.id.action_mainFragment_to_newsDetailFragment, bundle)
         }
