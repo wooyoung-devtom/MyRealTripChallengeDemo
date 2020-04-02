@@ -65,9 +65,9 @@ class MainViewModel(
                     .observeOn(AndroidSchedulers.mainThread())
                     .timeout(10, TimeUnit.SECONDS)
                     .subscribe ({ htmlStr ->
-                        Log.e("ViewModel success in news body", htmlStr)
+                        Log.e("ViewModel", htmlStr)
                     }, { error ->
-                        Log.e("ViewModel fail in news body", "${error.message}")
+                        Log.e("ViewModel", "${error.message}")
                         _startRefreshLiveEvent.postValue(false)
                     }))
             }
@@ -75,8 +75,8 @@ class MainViewModel(
     }
 
     private fun parseHtmlString(title: String?, link: String?, htmlStr: String?) {
-        val temp = ArrayList<String>()
-        val strMap = mutableMapOf<String, Int>()
+        val stringArray = ArrayList<String>()
+        val keywordMap = mutableMapOf<String, Int>()
         val doc = Jsoup.parse(htmlStr)
         val imgUrl = doc.select("meta[property=og:image]").attr("content")
         val description = doc.select("meta[property=og:description]").attr("content")
@@ -88,20 +88,17 @@ class MainViewModel(
             if(str.length >= 2) {
                 var tempStr = ""
                 for(strElement in str) {
-                    if(strElement != ' ') {
-                        tempStr += strElement
-                    }
+                    if(strElement != ' ') tempStr += strElement
                 }
-                Log.e("wordasdf", tempStr)
-                temp.add(tempStr)
-                strMap[tempStr] = 0
+                stringArray.add(tempStr)
+                keywordMap[tempStr] = 0
             }
         }
-        for(str in temp) {
-            val count = strMap[str]?.plus(1)
-            strMap[str] = count!!
+        for(str in stringArray) {
+            val count = keywordMap[str]?.plus(1)
+            keywordMap[str] = count!!
         }
-        val keySortedMap = strMap.toSortedMap()
+        val keySortedMap = keywordMap.toSortedMap()
         val listMap = keySortedMap.toList()
             .sortedWith(compareByDescending { it.second })
         Log.e("Parse HTML", "$listMap")

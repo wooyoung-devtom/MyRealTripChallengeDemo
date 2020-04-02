@@ -4,8 +4,6 @@ import com.example.myrealtripchallengedemo.data.api.RssHtmlService
 import com.example.myrealtripchallengedemo.data.api.RssService
 import com.example.myrealtripchallengedemo.data.dto.RssFeed
 import io.reactivex.Single
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class RssRepositoryImpl (
     private val rssService: RssService,
