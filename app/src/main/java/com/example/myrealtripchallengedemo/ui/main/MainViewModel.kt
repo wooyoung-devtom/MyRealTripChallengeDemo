@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.myrealtripchallengedemo.data.dto.NewsBody
 import com.example.myrealtripchallengedemo.data.dto.NewsDetailBody
 import com.example.myrealtripchallengedemo.data.dto.NewsDetailBody.KeyWord
 import com.example.myrealtripchallengedemo.data.dto.RssItem
@@ -16,7 +15,8 @@ import org.jsoup.Jsoup
 import java.util.concurrent.TimeUnit
 
 class MainViewModel(
-    private val rssRepository: RssRepository
+    private val rssRepository: RssRepository,
+    private val compositeDisposable: CompositeDisposable
 ) : ViewModel() {
 
     companion object {
@@ -27,10 +27,6 @@ class MainViewModel(
 
     private var rssItems: List<RssItem>? = null
     private val newsDetailBodyItems = ArrayList<NewsDetailBody>()
-    private val compositeDisposable = CompositeDisposable()
-
-    private val _newsTextLiveData = MutableLiveData<NewsBody>()
-    val newsTextLiveData: LiveData<NewsBody> get() = _newsTextLiveData
 
     private val _newsDetailBodyListLiveData = MutableLiveData<ArrayList<NewsDetailBody>>()
     val newsDetailBodyListLiveData: LiveData<ArrayList<NewsDetailBody>> get() = _newsDetailBodyListLiveData
@@ -41,6 +37,7 @@ class MainViewModel(
     fun getRssData() {
         newsDetailBodyItems.clear()
         compositeDisposable.add(rssRepository.getRssData(hl, gl, ceid)
+            .doOnSubscribe { _startRefreshLiveEvent.postValue(true) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .timeout(5, TimeUnit.SECONDS)
@@ -50,6 +47,7 @@ class MainViewModel(
                 Log.e("ViewModel", "$rssItems")
             }, { error ->
                 Log.e("ViewModel fail", "${error.message}")
+                _startRefreshLiveEvent.postValue(false)
             }))
     }
 
@@ -59,34 +57,44 @@ class MainViewModel(
                 val link = item.link!!
                 val title = item.title!!
                 compositeDisposable.add(rssRepository.getNewsData(link)
-                    .doOnSubscribe { _startRefreshLiveEvent.postValue(true) }
-                    .doOnSuccess { _startRefreshLiveEvent.postValue(false) }
+                    .doOnSuccess {
+                        parseHtmlString(title, link, it)
+                        _startRefreshLiveEvent.postValue(false)
+                    }
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .timeout(10, TimeUnit.SECONDS)
-                    .subscribe ({ result ->
-                        val newsBody = NewsBody(title, link, result)
-                        _newsTextLiveData.postValue(newsBody)
-                        Log.e("ViewModel success in news body", "$newsBody")
+                    .subscribe ({ htmlStr ->
+                        Log.e("ViewModel success in news body", htmlStr)
                     }, { error ->
                         Log.e("ViewModel fail in news body", "${error.message}")
+                        _startRefreshLiveEvent.postValue(false)
                     }))
             }
         } else Log.e("ViewModel", "News List is Empty!!")
     }
 
-    fun parseHtmlString(newsBody: NewsBody) {
+    private fun parseHtmlString(title: String?, link: String?, htmlStr: String?) {
+        val description: String
         val temp = ArrayList<String>()
         val strMap = mutableMapOf<String, Int>()
-        val doc = Jsoup.parse(newsBody.html)
+        val doc = Jsoup.parse(htmlStr)
         val imgUrl = doc.select("meta[property=og:image]").attr("content")
-        val description = doc.select("meta[property=og:description]").attr("content")
+        val encodingType = doc.select("meta[http-equiv=Content-type]").attr("content")
 
-        val arr = description.split(" ", "“", "”", "‘", "’", ",",
-            "[", "]", "...", "=", ".", "(", ")", ":", "\"", "\'") as MutableList
+        Log.e("encoding", encodingType)
+        description = if(encodingType == "text/html; charset=euc-kr" ||
+            encodingType == "text/html; charset=EUC-KR") {
+            " "
+        } else {
+            doc.select("meta[property=og:description]").attr("content")
+        }
+
+        val arr = description.split(" ", "“", "”", "‘", "’",
+            ",", "[", "]", "...", "=", ".", "(", ")", ":", "\"", "\'", "\n") as MutableList
 
         for(str in arr) {
-            if(str.length >= 2) {
+            if(str.length >= 2 && str[0] != ' ') {
                 temp.add(str)
                 strMap[str] = 0
             }
@@ -101,7 +109,8 @@ class MainViewModel(
         Log.e("Parse HTML", "$listMap")
 
         val keyWord = KeyWord(listMap[0].first, listMap[1].first, listMap[2].first)
-        val newsDetailBody = NewsDetailBody(imgUrl, description, newsBody, keyWord)
+        val newsDetailBody = NewsDetailBody(title, link, imgUrl, description, keyWord)
+        Log.e("newsDetail", "$newsDetailBody")
         newsDetailBodyItems.add(newsDetailBody)
         _newsDetailBodyListLiveData.postValue(newsDetailBodyItems)
     }

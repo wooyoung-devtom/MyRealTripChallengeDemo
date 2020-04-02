@@ -1,15 +1,12 @@
 package com.example.myrealtripchallengedemo.ui.news
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
 import com.example.myrealtripchallengedemo.R
-import com.example.myrealtripchallengedemo.data.dto.NewsBody
-import com.example.myrealtripchallengedemo.ui.main.NewsListAdapter
 import kotlinx.android.synthetic.main.fragment_news_detail.*
 
 class NewsDetailFragment : Fragment() {
@@ -25,6 +22,7 @@ class NewsDetailFragment : Fragment() {
         super.onCreateView(inflater, container, savedInstanceState)
         url = arguments?.getString("url")
         title = arguments?.getString("title")
+
         firstKey = arguments?.getString("firstKey")
         secondKey = arguments?.getString("secondKey")
         thirdKey = arguments?.getString("thirdKey")
@@ -44,7 +42,4 @@ class NewsDetailFragment : Fragment() {
         news_web_view.settings.javaScriptEnabled = true
         news_web_view.loadUrl(url)
     }
-
-
-
 }

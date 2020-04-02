@@ -37,9 +37,6 @@ class MainFragment : Fragment() {
         news_list.setHasFixedSize(true)
         news_list.layoutManager = LinearLayoutManager(context)
 
-        viewModel.newsTextLiveData.observe(viewLifecycleOwner, Observer {
-            viewModel.parseHtmlString(it)
-        })
         viewModel.startRefreshLiveEvent.observe(viewLifecycleOwner, Observer {
             news_list_container.isRefreshing = it
         })
