@@ -75,28 +75,26 @@ class MainViewModel(
     }
 
     private fun parseHtmlString(title: String?, link: String?, htmlStr: String?) {
-        val description: String
         val temp = ArrayList<String>()
         val strMap = mutableMapOf<String, Int>()
         val doc = Jsoup.parse(htmlStr)
         val imgUrl = doc.select("meta[property=og:image]").attr("content")
-        val encodingType = doc.select("meta[http-equiv=Content-type]").attr("content")
-
-        Log.e("encoding", encodingType)
-        description = if(encodingType == "text/html; charset=euc-kr" ||
-            encodingType == "text/html; charset=EUC-KR") {
-            " "
-        } else {
-            doc.select("meta[property=og:description]").attr("content")
-        }
+        val description = doc.select("meta[property=og:description]").attr("content")
 
         val arr = description.split(" ", "“", "”", "‘", "’",
             ",", "[", "]", "...", "=", ".", "(", ")", ":", "\"", "\'", "\n") as MutableList
 
         for(str in arr) {
-            if(str.length >= 2 && str[0] != ' ') {
-                temp.add(str)
-                strMap[str] = 0
+            if(str.length >= 2) {
+                var tempStr = ""
+                for(strElement in str) {
+                    if(strElement != ' ') {
+                        tempStr += strElement
+                    }
+                }
+                Log.e("wordasdf", tempStr)
+                temp.add(tempStr)
+                strMap[tempStr] = 0
             }
         }
         for(str in temp) {
